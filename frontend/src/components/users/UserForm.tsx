@@ -1,15 +1,26 @@
-import { FC, useState } from 'react'
+import { FC, useState, useEffect } from 'react'
 import { TextField, Button, Box, Typography } from '@mui/material'
+import { User } from '../../types/User'
 
 interface Props {
   title: string
+  initialData?: Partial<User>
   onSubmit: (data: { name: string; username: string; email: string }) => void
 }
 
-const UserForm: FC<Props> = ({ title, onSubmit }) => {
-  const [name, setName] = useState('')
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
+const UserForm: FC<Props> = ({ title, initialData, onSubmit }) => {
+  const [name, setName] = useState(initialData?.name || '')
+  const [username, setUsername] = useState(initialData?.username || '')
+  const [email, setEmail] = useState(initialData?.email || '')
+
+  // If initialData arrives after mount, populate the form
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || '')
+      setUsername(initialData.username || '')
+      setEmail(initialData.email || '')
+    }
+  }, [initialData])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

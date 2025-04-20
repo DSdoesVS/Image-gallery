@@ -19,8 +19,17 @@ export function fetchAlbumPhotos(albumId: number): Promise<Photo[]> {
   return API.get<Photo[]>(`/photos?albumId=${albumId}`).then(res =>
     res.data.map(p => ({
       ...p,
-      url: `https://picsum.photos/id/${p.id}/800/600`,
-      thumbnailUrl: `https://picsum.photos/id/${p.id}/150/150`
+      url: `https://picsum.photos/seed/${p.id}/800/600`,
+      thumbnailUrl: `https://picsum.photos/seed/${p.id}/150/150`
     }))
   )
 }
+export function createUser(user: Partial<User>): Promise<User> {
+    return API.post<User>('/users', user).then(res => res.data)
+  }
+  export function deleteUser(userId: number): Promise<void> {
+    return API.delete(`/users/${userId}`).then(() => {})
+  }
+  export function updateUser(userId: number, data: Partial<User>): Promise<User> {
+    return API.put<User>(`/users/${userId}`, data).then(res => res.data)
+  }
