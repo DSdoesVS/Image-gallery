@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { fetchUserAlbums } from '../services/api'
+import { fetchUserAlbums, fetchAlbumPhotos } from '../services/api'
 import { Album } from '../types/Album'
+import { Photo } from '../types/Photo'
 import {
   CircularProgress,
   Alert,
   Grid,
   Card,
+  CardMedia,
   CardContent,
   Typography,
   Button
@@ -15,20 +17,32 @@ import {
 export default function UserDetailsPage() {
   const { userId } = useParams<{ userId?: string }>()
   const [albums, setAlbums] = useState<Album[]>([])
+  const [covers, setCovers] = useState<Record<number, Photo>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!userId) return
-    fetchUserAlbums(+userId)
-      .then(data => {
-        setAlbums(data)
-        setLoading(false)
-      })
-      .catch(() => {
+
+    ;(async () => {
+      try {
+        const albumData = await fetchUserAlbums(+userId)
+        setAlbums(albumData)
+
+        const coverEntries = await Promise.all(
+          albumData.map(async (album) => {
+            const photos = await fetchAlbumPhotos(album.id)
+            return [album.id, photos[0]] as [number, Photo]
+          })
+        )
+
+        setCovers(Object.fromEntries(coverEntries))
+      } catch {
         setError('Failed to load albums')
+      } finally {
         setLoading(false)
-      })
+      }
+    })()
   }, [userId])
 
   if (loading) return <CircularProgress />
@@ -37,19 +51,27 @@ export default function UserDetailsPage() {
   return (
     <div style={{ padding: 16 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
-        Albums
+        Albums ({albums.length})
       </Typography>
       <Grid container spacing={2}>
-        {albums.map(album => (
+        {albums.map((album) => (
           <Grid item xs={12} sm={6} md={4} key={album.id}>
             <Card>
+              {covers[album.id] && (
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image={covers[album.id].thumbnailUrl}
+                  alt={album.title}
+                />
+              )}
               <CardContent>
                 <Typography variant="h6">{album.title}</Typography>
                 <Button
                   component={Link}
                   to={`/albums/${album.id}`}
-                  size="small"
                   variant="contained"
+                  size="small"
                   sx={{ mt: 1 }}
                 >
                   View Photos
