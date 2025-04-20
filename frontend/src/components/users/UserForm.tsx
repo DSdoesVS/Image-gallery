@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { FC, useState } from 'react'
 import { TextField, Button, Box, Typography } from '@mui/material'
 
 interface Props {
@@ -6,7 +6,7 @@ interface Props {
   onSubmit: (data: { name: string; username: string; email: string }) => void
 }
 
-export default function UserForm({ title, onSubmit }: Props) {
+const UserForm: FC<Props> = ({ title, onSubmit }) => {
   const [name, setName] = useState('')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -50,3 +50,5 @@ export default function UserForm({ title, onSubmit }: Props) {
     </Box>
   )
 }
+
+export default UserForm
