@@ -1,3 +1,4 @@
+// src/pages/UserListPage.tsx
 import { useState, useEffect } from 'react'
 import { fetchUsers } from '../services/api'
 import { User } from '../types/User'
@@ -22,34 +23,33 @@ export default function UserListPage() {
   }, [])
 
   if (loading) return <CircularProgress />
-
   if (error) return <Alert severity="error">{error}</Alert>
 
   return (
-    <Grid container spacing={2} sx={{ p: 2 }}>
-      {users.map(user => (
-        <Grid item xs={12} sm={6} md={4} key={user.id}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">{user.name}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                @{user.username}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                {user.email}
-              </Typography>
-              <Button
-                component={Link}
-                to={`/users/${user.id}`}
-                variant="contained"
-                size="small"
-              >
-                View Albums
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+    <>
+      <Button variant="contained" component={Link} to="/users/new" sx={{ m: 2 }}>
+        New User
+      </Button>
+      <Grid container spacing={2} sx={{ p: 2 }}>
+        {users.map(user => (
+          <Grid item xs={12} sm={6} md={4} key={user.id}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">{user.name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  @{user.username}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  {user.email}
+                </Typography>
+                <Button component={Link} to={`/users/${user.id}`} variant="contained" size="small">
+                  View Albums
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </>
   )
 }
