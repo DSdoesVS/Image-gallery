@@ -1,30 +1,42 @@
+// src/pages/UserEditPage.tsx
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { fetchUser, updateUser } from '../services/api'
+import { CircularProgress, Alert, Box } from '@mui/material'
 import UserForm from '../components/users/UserForm'
-import { fetchUsers, updateUser } from '../services/api'
 import { User } from '../types/User'
-import { CircularProgress } from '@mui/material'
 
 export default function UserEditPage() {
-  const { userId } = useParams<{ userId: string }>()
+  const { userId } = useParams<{ userId?: string }>()
   const navigate = useNavigate()
-  const [initial, setInitial] = useState<Partial<User> | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!userId) return
-    fetchUsers()
-      .then(list => {
-        const found = list.find(u => u.id === +userId)
-        setInitial(found || null)
-      })
+    fetchUser(+userId)
+      .then(setUser)
+      .catch(() => setError('Failed to load user'))
+      .finally(() => setLoading(false))
   }, [userId])
 
-  if (!initial) return <CircularProgress />
+  if (loading) return <CircularProgress />
+  if (error) return <Alert severity="error">{error}</Alert>
+  if (!user) return null
 
-  const handleSubmit = async (data: Partial<User>) => {
-    await updateUser(+userId!, data)
+  const handleUpdate = async (data: { name: string; username: string; email: string }) => {
+    await updateUser(user.id, data)
     navigate('/users')
   }
 
-  return <UserForm title="Edit User" initialData={initial} onSubmit={handleSubmit} />
+  return (
+    <Box sx={{ p: 2 }}>
+      <UserForm
+        title="Edit User"
+        initialData={user}
+        onSubmit={handleUpdate}
+      />
+    </Box>
+  )
 }

@@ -4,18 +4,28 @@ import PhotoForm from '../components/photos/PhotoForm'
 import { createPhoto } from '../services/api'
 
 export default function PhotoCreatePage() {
-  const { albumId } = useParams<{ albumId?: string }>()
+  const { albumId } = useParams<{ albumId: string }>()
   const navigate = useNavigate()
 
-  const handleSubmit = async (data: { title: string; url: string; thumbnailUrl: string; albumId: number }) => {
-    await createPhoto(data)
+  const handleSubmit = async (data: {
+    title: string
+    url: string
+    thumbnailUrl: string
+    albumId: string
+  }) => {
+    await createPhoto({
+      title: data.title,
+      url: data.url,
+      thumbnailUrl: data.thumbnailUrl,
+      albumId: data.albumId
+    })
+    // once created, go back to the album view
     navigate(`/albums/${data.albumId}`)
   }
 
   return (
     <PhotoForm
       title="New Photo"
-      initialData={{ albumId: albumId ? +albumId : 0 }}
       onSubmit={handleSubmit}
     />
   )

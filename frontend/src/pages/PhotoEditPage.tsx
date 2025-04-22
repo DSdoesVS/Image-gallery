@@ -7,7 +7,7 @@ import { CircularProgress, Box, Alert } from '@mui/material'
 import { Photo } from '../types/Photo'
 
 export default function PhotoEditPage() {
-  const { photoId } = useParams<{ photoId?: string }>()
+  const { photoId } = useParams<{ photoId: string }>()
   const navigate = useNavigate()
   const [photo, setPhoto] = useState<Photo | null>(null)
   const [loading, setLoading] = useState(true)
@@ -25,8 +25,19 @@ export default function PhotoEditPage() {
   if (error) return <Alert severity="error">{error}</Alert>
   if (!photo) return null
 
-  const handleSubmit = async (data: { title: string; url: string; thumbnailUrl: string; albumId: number }) => {
-    await updatePhoto(+photoId!, data)
+  const handleSubmit = async (data: {
+    title: string
+    url: string
+    thumbnailUrl: string
+    albumId: string
+  }) => {
+    await updatePhoto(+photoId, {
+      title: data.title,
+      url: data.url,
+      thumbnailUrl: data.thumbnailUrl,
+      albumId: data.albumId
+    })
+    // after update, go back to the album’s photo carousel
     navigate(`/albums/${data.albumId}`)
   }
 

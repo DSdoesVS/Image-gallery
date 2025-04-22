@@ -26,6 +26,7 @@ export default function AlbumDetailsPage() {
   const [error, setError] = useState<string | null>(null)
   const [current, setCurrent] = useState(0)
 
+  // Fetch all photos for this album on mount / albumId change
   useEffect(() => {
     if (!albumId) return
     fetchAlbumPhotos(+albumId)
@@ -39,6 +40,7 @@ export default function AlbumDetailsPage() {
       })
   }, [albumId])
 
+  // Loading state
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -47,6 +49,7 @@ export default function AlbumDetailsPage() {
     )
   }
 
+  // Error state
   if (error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
@@ -55,13 +58,16 @@ export default function AlbumDetailsPage() {
     )
   }
 
+  // Handlers for carousel navigation
   const prev = () => setCurrent(i => (i === 0 ? photos.length - 1 : i - 1))
   const next = () => setCurrent(i => (i === photos.length - 1 ? 0 : i + 1))
 
+  // Delete current photo
   const handleDeletePhoto = async (photoId: number) => {
     await deletePhoto(photoId)
     setPhotos(ps => ps.filter(p => p.id !== photoId))
     setCurrent(i => {
+      // If we removed the last photo, step back
       if (i >= photos.length - 1) return photos.length - 2
       return i
     })
@@ -69,8 +75,8 @@ export default function AlbumDetailsPage() {
 
   return (
     <Container disableGutters maxWidth={false} sx={{ width: '100%', overflow: 'hidden' }}>
+      {/* Header with New Photo button and position indicator */}
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {/* New Photo button */}
         <Button
           component={Link}
           to={`/albums/${albumId}/photos/new`}
@@ -84,6 +90,7 @@ export default function AlbumDetailsPage() {
         </Typography>
       </Box>
 
+      {/* Main carousel area */}
       <Box
         sx={{
           position: 'relative',
@@ -140,7 +147,7 @@ export default function AlbumDetailsPage() {
         </IconButton>
       </Box>
 
-      {/* Edit/Delete current photo */}
+      {/* Edit/Delete controls for the current photo */}
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1 }}>
         <Button
           component={Link}

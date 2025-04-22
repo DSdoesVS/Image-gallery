@@ -1,32 +1,38 @@
-// src/components/photos/PhotoForm.tsx
 import { FC, useState, useEffect } from 'react'
 import { TextField, Button, Box, Typography } from '@mui/material'
+import { useParams } from 'react-router-dom'
 import { Photo } from '../../types/Photo'
+
+interface PhotoFormData {
+  title: string
+  url: string
+  thumbnailUrl: string
+  albumId: string
+}
 
 interface Props {
   title: string
   initialData?: Partial<Photo>
-  onSubmit: (data: { title: string; url: string; thumbnailUrl: string; albumId: number }) => void
+  onSubmit: (data: PhotoFormData) => void
 }
 
 const PhotoForm: FC<Props> = ({ title, initialData, onSubmit }) => {
+  const { albumId = '' } = useParams<{ albumId: string }>()
   const [photoTitle, setPhotoTitle] = useState(initialData?.title || '')
   const [url, setUrl] = useState(initialData?.url || '')
-  const [thumb, setThumb] = useState(initialData?.thumbnailUrl || '')
-  const [albumId, setAlbumId] = useState(initialData?.albumId || 0)
+  const [thumbnailUrl, setThumbnailUrl] = useState(initialData?.thumbnailUrl || '')
 
   useEffect(() => {
     if (initialData) {
-      setPhotoTitle(initialData.title || '')
-      setUrl(initialData.url || '')
-      setThumb(initialData.thumbnailUrl || '')
-      setAlbumId(initialData.albumId || 0)
+      setPhotoTitle(initialData.title ?? '')
+      setUrl(initialData.url ?? '')
+      setThumbnailUrl(initialData.thumbnailUrl ?? '')
     }
   }, [initialData])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({ title: photoTitle, url, thumbnailUrl: thumb, albumId })
+    onSubmit({ title: photoTitle, url, thumbnailUrl, albumId })
   }
 
   return (
@@ -54,18 +60,8 @@ const PhotoForm: FC<Props> = ({ title, initialData, onSubmit }) => {
       <TextField
         fullWidth
         label="Thumbnail URL"
-        value={thumb}
-        onChange={e => setThumb(e.target.value)}
-        margin="normal"
-        required
-      />
-
-      <TextField
-        fullWidth
-        label="Album ID"
-        type="number"
-        value={albumId}
-        onChange={e => setAlbumId(Number(e.target.value))}
+        value={thumbnailUrl}
+        onChange={e => setThumbnailUrl(e.target.value)}
         margin="normal"
         required
       />

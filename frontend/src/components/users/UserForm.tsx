@@ -1,3 +1,4 @@
+// src/components/users/UserForm.tsx
 import { FC, useState, useEffect } from 'react'
 import { TextField, Button, Box, Typography } from '@mui/material'
 import { User } from '../../types/User'
@@ -5,15 +6,15 @@ import { User } from '../../types/User'
 interface Props {
   title: string
   initialData?: Partial<User>
-  onSubmit: (data: { name: string; username: string; email: string }) => void
+  onSubmit: (data: { name: string; username: string; email: string }) => Promise<void>
 }
 
 const UserForm: FC<Props> = ({ title, initialData, onSubmit }) => {
   const [name, setName] = useState(initialData?.name || '')
   const [username, setUsername] = useState(initialData?.username || '')
   const [email, setEmail] = useState(initialData?.email || '')
+  const [submitting, setSubmitting] = useState(false)
 
-  // If initialData arrives after mount, populate the form
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || '')
@@ -22,13 +23,15 @@ const UserForm: FC<Props> = ({ title, initialData, onSubmit }) => {
     }
   }, [initialData])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({ name, username, email })
+    setSubmitting(true)
+    await onSubmit({ name, username, email })
+    setSubmitting(false)
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, mx: 'auto', mt: 4 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 480, mx: 'auto', mt: 4 }}>
       <Typography variant="h5" sx={{ mb: 2 }}>{title}</Typography>
       <TextField
         fullWidth
@@ -55,7 +58,12 @@ const UserForm: FC<Props> = ({ title, initialData, onSubmit }) => {
         margin="normal"
         required
       />
-      <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+      <Button
+        type="submit"
+        variant="contained"
+        disabled={submitting}
+        sx={{ mt: 2 }}
+      >
         {title}
       </Button>
     </Box>
