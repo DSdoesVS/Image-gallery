@@ -1,11 +1,12 @@
 // src/pages/UserDetailsPage.tsx
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   fetchUserAlbums,
   fetchAlbumPhotos,
   deleteAlbum
 } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 import { Album } from '../types/Album'
 import { Photo } from '../types/Photo'
 import {
@@ -19,18 +20,24 @@ import {
   Button,
   Box
 } from '@mui/material'
+import { generateFakeAlbums, generateFakePhoto } from '../utils/fakeData'
 
 export default function UserDetailsPage() {
   const { userId } = useParams<{ userId: string }>()
+  const { user, isAuthenticated } = useAuth()
+  const navigate = useNavigate()
   const [albums, setAlbums] = useState<Album[]>([])
   const [covers, setCovers] = useState<Record<string, Photo>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [useFakeData, setUseFakeData] = useState(false)
 
   // Deletes an album by ID, then removes it from local state
   const handleDeleteAlbum = async (albumId: string) => {
     try {
-      await deleteAlbum(albumId)
+      if (!useFakeData) {
+        await deleteAlbum(albumId)
+      }
       setAlbums(prev => prev.filter(a => a._id !== albumId))
       // also drop its cover
       setCovers(prev => {
@@ -44,12 +51,45 @@ export default function UserDetailsPage() {
   }
 
   useEffect(() => {
-    if (!userId) return
+    // If not authenticated, don't try to fetch data
+    if (!isAuthenticated) {
+      setLoading(false)
+      setUseFakeData(true)
+      // Use current user's ID if none provided in URL
+      const effectiveUserId = userId || (user ? user.id : '1')
+      const fakeAlbums = generateFakeAlbums(parseInt(effectiveUserId, 10), 6)
+      setAlbums(fakeAlbums)
+      
+      // Generate fake covers for each album
+      const fakeCoverEntries = fakeAlbums.map(album => {
+        const photo = generateFakePhoto(album.id)
+        return [album._id, photo] as [string, Photo]
+      })
+      setCovers(Object.fromEntries(fakeCoverEntries))
+      return
+    }
+    
+    // If user is viewing their own profile but URL doesn't match authenticated user ID
+    if (!userId && user) {
+      // Redirect to the correct user profile
+      navigate(`/users/${user.id}`);
+      return;
+    }
+
+    // Use current user's ID if none provided in URL
+    const effectiveUserId = userId || (user ? user.id : '')
+    
+    if (!effectiveUserId) {
+      setLoading(false)
+      setError('No user ID available')
+      setUseFakeData(true)
+      return
+    }
 
     ;(async () => {
       try {
         // 1) Load this user's albums
-        const albumData = await fetchUserAlbums(userId)
+        const albumData = await fetchUserAlbums(effectiveUserId)
         setAlbums(albumData)
 
         // 2) For each album, load its photos and pick the first as cover
@@ -60,19 +100,39 @@ export default function UserDetailsPage() {
           })
         )
         setCovers(Object.fromEntries(coverEntries))
-      } catch {
+        setUseFakeData(false)
+      } catch (error) {
+        console.error('Error loading albums:', error)
         setError('Failed to load albums or covers')
+        
+        // Generate fake albums when real data fails to load
+        const fakeAlbums = generateFakeAlbums(parseInt(effectiveUserId, 10), 6)
+        setAlbums(fakeAlbums)
+        
+        // Generate fake covers for each album
+        const fakeCoverEntries = fakeAlbums.map(album => {
+          const photo = generateFakePhoto(album.id)
+          return [album._id, photo] as [string, Photo]
+        })
+        setCovers(Object.fromEntries(fakeCoverEntries))
+        setUseFakeData(true)
       } finally {
         setLoading(false)
       }
     })()
-  }, [userId])
+  }, [userId, user, isAuthenticated, navigate])
 
   if (loading) return <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 8 }} />
-  if (error)   return <Alert severity="error" sx={{ mx: 2 }}>{error}</Alert>
 
   return (
     <Box sx={{ p: 2 }}>
+      {/* Show info alert when using fake data */}
+      {useFakeData && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Unable to connect to the server. Showing placeholder albums.
+        </Alert>
+      )}
+      
       {/* New‐Album button */}
       <Box sx={{ mb: 2, textAlign: 'right' }}>
         <Button

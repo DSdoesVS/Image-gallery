@@ -1,12 +1,12 @@
 import express from 'express'
 import Album from '../models/Album'
 import Photo from '../models/Photo'
-import { requireAuth } from '../middleware/requireAuth'
+import { requireAuth, AuthRequest } from '../middleware/requireAuth'
 
 const router = express.Router()
 
 // List photos in an album
-router.get('/albums/:albumId/photos', requireAuth, async (req, res) => {
+router.get('/albums/:albumId/photos', requireAuth, async (req: AuthRequest, res) => {
   const { albumId } = req.params
   const album = await Album.findById(albumId)
   if (!album) return res.status(404).json({ error: 'Album not found' })
@@ -16,7 +16,7 @@ router.get('/albums/:albumId/photos', requireAuth, async (req, res) => {
 })
 
 // Create a photo
-router.post('/albums/:albumId/photos', requireAuth, async (req, res) => {
+router.post('/albums/:albumId/photos', requireAuth, async (req: AuthRequest, res) => {
   const { albumId } = req.params
   const album = await Album.findById(albumId)
   if (!album) return res.status(404).json({ error: 'Album not found' })
@@ -27,7 +27,7 @@ router.post('/albums/:albumId/photos', requireAuth, async (req, res) => {
 })
 
 // Get a single photo
-router.get('/photos/:photoId', requireAuth, async (req, res) => {
+router.get('/photos/:photoId', requireAuth, async (req: AuthRequest, res) => {
   const photo = await Photo.findById(req.params.photoId)
   if (!photo) return res.status(404).json({ error: 'Photo not found' })
   const album = await Album.findById(photo.albumId)
@@ -36,7 +36,7 @@ router.get('/photos/:photoId', requireAuth, async (req, res) => {
 })
 
 // Update a photo
-router.put('/photos/:photoId', requireAuth, async (req, res) => {
+router.put('/photos/:photoId', requireAuth, async (req: AuthRequest, res) => {
   const photo = await Photo.findById(req.params.photoId)
   if (!photo) return res.status(404).json({ error: 'Photo not found' })
   const album = await Album.findById(photo.albumId)
@@ -50,7 +50,7 @@ router.put('/photos/:photoId', requireAuth, async (req, res) => {
 })
 
 // Delete a photo
-router.delete('/photos/:photoId', requireAuth, async (req, res) => {
+router.delete('/photos/:photoId', requireAuth, async (req: AuthRequest, res) => {
   const photo = await Photo.findById(req.params.photoId)
   if (!photo) return res.status(404).json({ error: 'Photo not found' })
   const album = await Album.findById(photo.albumId)

@@ -17,6 +17,7 @@ import {
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { generateFakePhotos } from '../utils/fakeData'
 
 export default function AlbumDetailsPage() {
   const { albumId } = useParams<{ albumId?: string }>()
@@ -25,19 +26,28 @@ export default function AlbumDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [current, setCurrent] = useState(0)
+  const [useFakeData, setUseFakeData] = useState(false)
 
   // Fetch all photos for this album on mount / albumId change
   useEffect(() => {
     if (!albumId) return
-    fetchAlbumPhotos(+albumId)
-      .then(data => {
+    
+    const loadPhotos = async () => {
+      try {
+        const data = await fetchAlbumPhotos(+albumId)
         setPhotos(data)
-        setLoading(false)
-      })
-      .catch(() => {
+      } catch {
         setError('Failed to load photos')
+        // Generate fake photos when real data fails to load
+        const fakePhotos = generateFakePhotos(+albumId, 8)
+        setPhotos(fakePhotos)
+        setUseFakeData(true)
+      } finally {
         setLoading(false)
-      })
+      }
+    }
+    
+    loadPhotos()
   }, [albumId])
 
   // Loading state
@@ -49,11 +59,27 @@ export default function AlbumDetailsPage() {
     )
   }
 
-  // Error state
-  if (error) {
+  // If we have an error but no fake data, show the error
+  if (error && !useFakeData) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
         <Alert severity="error" sx={{ width: '100%', maxWidth: 600 }}>{error}</Alert>
+      </Box>
+    )
+  }
+
+  // Check for empty photos array (shouldn't happen with fake data)
+  if (photos.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 2, flexDirection: 'column', alignItems: 'center' }}>
+        <Alert severity="info" sx={{ width: '100%', maxWidth: 600, mb: 2 }}>No photos found in this album.</Alert>
+        <Button 
+          component={Link} 
+          to={`/albums/${albumId}/photos/new`} 
+          variant="contained"
+        >
+          Add a Photo
+        </Button>
       </Box>
     )
   }
@@ -64,7 +90,15 @@ export default function AlbumDetailsPage() {
 
   // Delete current photo
   const handleDeletePhoto = async (photoId: number) => {
-    await deletePhoto(photoId)
+    if (!useFakeData) {
+      try {
+        await deletePhoto(photoId)
+      } catch {
+        console.error('Failed to delete photo')
+        return // Don't proceed with UI update if the API call failed
+      }
+    }
+    
     setPhotos(ps => ps.filter(p => p.id !== photoId))
     setCurrent(i => {
       // If we removed the last photo, step back
@@ -75,6 +109,13 @@ export default function AlbumDetailsPage() {
 
   return (
     <Container disableGutters maxWidth={false} sx={{ width: '100%', overflow: 'hidden' }}>
+      {/* Show info alert when using fake data */}
+      {useFakeData && (
+        <Alert severity="info" sx={{ mb: 2, mx: 2 }}>
+          Unable to connect to the server. Showing placeholder photos.
+        </Alert>
+      )}
+    
       {/* Header with New Photo button and position indicator */}
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Button

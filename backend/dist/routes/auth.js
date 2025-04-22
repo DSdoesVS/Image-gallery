@@ -52,7 +52,7 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
             user: { id: user._id, name: user.name, username: user.username, email: user.email }
         });
     }
-    catch (_a) {
+    catch (_b) {
         res.status(500).json({ error: 'Login failed' });
     }
 }));

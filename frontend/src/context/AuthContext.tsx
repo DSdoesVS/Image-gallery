@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { registerUser, loginUser, AuthResponse } from '../services/api'
+import { loginUser, registerUser } from '../services/api'
 import { User } from '../types/User'
 
 interface AuthContextType {
@@ -8,29 +8,60 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>
   register: (name: string, username: string, email: string, password: string) => Promise<void>
   logout: () => void
+  isAuthenticated: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+// Custom hook to use the auth context
+function useAuth() {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
+
+function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
+  // Initialize auth state from localStorage on component mount
   useEffect(() => {
-    const t = localStorage.getItem('token')
-    const u = localStorage.getItem('user')
-    if (t && u) {
-      setToken(t)
-      setUser(JSON.parse(u))
+    const storedToken = localStorage.getItem('token')
+    const storedUser = localStorage.getItem('user')
+    
+    if (storedToken && storedUser) {
+      try {
+        setToken(storedToken)
+        setUser(JSON.parse(storedUser))
+        setIsAuthenticated(true)
+      } catch (error) {
+        // Handle potential JSON parse error
+        console.error('Error parsing stored user data', error)
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+      }
     }
   }, [])
 
   const login = async (username: string, password: string) => {
-    const { token, user } = await loginUser({ username, password })
-    setToken(token)
-    setUser(user)
-    localStorage.setItem('token', token)
-    localStorage.setItem('user', JSON.stringify(user))
+    try {
+      const response = await loginUser({ username, password })
+      
+      // Store token and user in state and localStorage
+      setToken(response.token)
+      setUser(response.user)
+      setIsAuthenticated(true)
+      
+      localStorage.setItem('token', response.token)
+      localStorage.setItem('user', JSON.stringify(response.user))
+      
+      return Promise.resolve()
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   const register = async (
@@ -39,29 +70,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string
   ) => {
-    const { token, user } = await registerUser({ name, username, email, password })
-    setToken(token)
-    setUser(user)
-    localStorage.setItem('token', token)
-    localStorage.setItem('user', JSON.stringify(user))
+    try {
+      const response = await registerUser({ name, username, email, password })
+      
+      // If the backend returns a token on registration, store it
+      if (response.token) {
+        setToken(response.token)
+        setUser(response.user)
+        setIsAuthenticated(true)
+        
+        localStorage.setItem('token', response.token)
+        localStorage.setItem('user', JSON.stringify(response.user))
+      }
+      
+      return Promise.resolve()
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   const logout = () => {
+    // Clear auth state and localStorage
     setToken(null)
     setUser(null)
+    setIsAuthenticated(false)
+    
     localStorage.removeItem('token')
     localStorage.removeItem('user')
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      login, 
+      register, 
+      logout,
+      isAuthenticated 
+    }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within an AuthProvider')
-  return ctx
-}
+export { AuthProvider, useAuth }
