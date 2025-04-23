@@ -1,4 +1,4 @@
-// src/pages/UserDetailsPage.tsx
+
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
@@ -32,35 +32,35 @@ export default function UserDetailsPage() {
   const [error, setError] = useState<string | null>(null)
   const [useFakeData, setUseFakeData] = useState(false)
 
-  // Deletes an album by ID, then removes it from local state
+  
   const handleDeleteAlbum = async (albumId: string) => {
     try {
       if (!useFakeData) {
         await deleteAlbum(albumId)
       }
       setAlbums(prev => prev.filter(a => a._id !== albumId))
-      // also drop its cover
+      
       setCovers(prev => {
         const { [albumId]: _, ...rest } = prev
         return rest
       })
     } catch {
-      // you might show a toast/error here
+     
       console.error('Failed to delete album')
     }
   }
 
   useEffect(() => {
-    // If not authenticated, don't try to fetch data
+   
     if (!isAuthenticated) {
       setLoading(false)
       setUseFakeData(true)
-      // Use current user's ID if none provided in URL
+   
       const effectiveUserId = userId || (user ? user.id : '1')
       const fakeAlbums = generateFakeAlbums(parseInt(effectiveUserId, 10), 6)
       setAlbums(fakeAlbums)
       
-      // Generate fake covers for each album
+  
       const fakeCoverEntries = fakeAlbums.map(album => {
         const photo = generateFakePhoto(album.id)
         return [album._id, photo] as [string, Photo]
@@ -69,14 +69,13 @@ export default function UserDetailsPage() {
       return
     }
     
-    // If user is viewing their own profile but URL doesn't match authenticated user ID
+    
     if (!userId && user) {
-      // Redirect to the correct user profile
       navigate(`/users/${user.id}`);
       return;
     }
 
-    // Use current user's ID if none provided in URL
+    
     const effectiveUserId = userId || (user ? user.id : '')
     
     if (!effectiveUserId) {
@@ -88,11 +87,11 @@ export default function UserDetailsPage() {
 
     ;(async () => {
       try {
-        // 1) Load this user's albums
+        
         const albumData = await fetchUserAlbums(effectiveUserId)
         setAlbums(albumData)
 
-        // 2) For each album, load its photos and pick the first as cover
+        
         const coverEntries = await Promise.all(
           albumData.map(async album => {
             const photos = await fetchAlbumPhotos(album._id)
@@ -105,7 +104,7 @@ export default function UserDetailsPage() {
         console.error('Error loading albums:', error)
         setError('Failed to load albums or covers')
         
-        // Generate fake albums when real data fails to load
+        
         const fakeAlbums = generateFakeAlbums(parseInt(effectiveUserId, 10), 6)
         setAlbums(fakeAlbums)
         
@@ -126,14 +125,13 @@ export default function UserDetailsPage() {
 
   return (
     <Box sx={{ p: 2 }}>
-      {/* Show info alert when using fake data */}
       {useFakeData && (
         <Alert severity="info" sx={{ mb: 2 }}>
           Unable to connect to the server. Showing placeholder albums.
         </Alert>
       )}
       
-      {/* New‐Album button */}
+     
       <Box sx={{ mb: 2, textAlign: 'right' }}>
         <Button
           component={Link}
@@ -153,7 +151,7 @@ export default function UserDetailsPage() {
         {albums.map(album => (
           <Grid item xs={12} sm={6} md={4} key={album._id}>
             <Card>
-              {/* cover image if available */}
+              
               {covers[album._id] && (
                 <CardMedia
                   component="img"

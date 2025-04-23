@@ -1,4 +1,4 @@
-// src/pages/AlbumCreatePage.tsx
+
 import { useNavigate, useParams } from 'react-router-dom'
 import AlbumForm from '../components/albums/AlbumForm'
 import { createAlbum } from '../services/api'

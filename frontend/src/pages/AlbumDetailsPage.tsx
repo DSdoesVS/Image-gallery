@@ -1,4 +1,4 @@
-// src/pages/AlbumDetailsPage.tsx
+
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
@@ -28,7 +28,7 @@ export default function AlbumDetailsPage() {
   const [current, setCurrent] = useState(0)
   const [useFakeData, setUseFakeData] = useState(false)
 
-  // Fetch all photos for this album on mount / albumId change
+  
   useEffect(() => {
     if (!albumId) return
     
@@ -38,7 +38,7 @@ export default function AlbumDetailsPage() {
         setPhotos(data)
       } catch {
         setError('Failed to load photos')
-        // Generate fake photos when real data fails to load
+        
         const fakePhotos = generateFakePhotos(+albumId, 8)
         setPhotos(fakePhotos)
         setUseFakeData(true)
@@ -50,7 +50,6 @@ export default function AlbumDetailsPage() {
     loadPhotos()
   }, [albumId])
 
-  // Loading state
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -59,7 +58,7 @@ export default function AlbumDetailsPage() {
     )
   }
 
-  // If we have an error but no fake data, show the error
+
   if (error && !useFakeData) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
@@ -68,7 +67,7 @@ export default function AlbumDetailsPage() {
     )
   }
 
-  // Check for empty photos array (shouldn't happen with fake data)
+
   if (photos.length === 0) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 2, flexDirection: 'column', alignItems: 'center' }}>
@@ -84,7 +83,7 @@ export default function AlbumDetailsPage() {
     )
   }
 
-  // Handlers for carousel navigation
+  
   const prev = () => setCurrent(i => (i === 0 ? photos.length - 1 : i - 1))
   const next = () => setCurrent(i => (i === photos.length - 1 ? 0 : i + 1))
 
@@ -95,13 +94,13 @@ export default function AlbumDetailsPage() {
         await deletePhoto(photoId)
       } catch {
         console.error('Failed to delete photo')
-        return // Don't proceed with UI update if the API call failed
+        return 
       }
     }
     
     setPhotos(ps => ps.filter(p => p.id !== photoId))
     setCurrent(i => {
-      // If we removed the last photo, step back
+     
       if (i >= photos.length - 1) return photos.length - 2
       return i
     })
@@ -109,14 +108,14 @@ export default function AlbumDetailsPage() {
 
   return (
     <Container disableGutters maxWidth={false} sx={{ width: '100%', overflow: 'hidden' }}>
-      {/* Show info alert when using fake data */}
+     
       {useFakeData && (
         <Alert severity="info" sx={{ mb: 2, mx: 2 }}>
           Unable to connect to the server. Showing placeholder photos.
         </Alert>
       )}
     
-      {/* Header with New Photo button and position indicator */}
+      
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Button
           component={Link}
@@ -131,7 +130,7 @@ export default function AlbumDetailsPage() {
         </Typography>
       </Box>
 
-      {/* Main carousel area */}
+      
       <Box
         sx={{
           position: 'relative',
@@ -188,7 +187,7 @@ export default function AlbumDetailsPage() {
         </IconButton>
       </Box>
 
-      {/* Edit/Delete controls for the current photo */}
+      
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1 }}>
         <Button
           component={Link}
@@ -208,7 +207,7 @@ export default function AlbumDetailsPage() {
         </Button>
       </Box>
 
-      {/* Thumbnail strip */}
+      
       <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 0.5, px: 1, py: 1 }}>
         {photos.map((p, idx) => (
           <Box

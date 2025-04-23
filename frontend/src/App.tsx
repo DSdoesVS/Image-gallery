@@ -21,12 +21,12 @@ export default function App() {
 
       <main style={{ padding: 16 }}>
         <Routes>
-          {/* Public */}
+          
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/" element={<HomePage />} />
 
-          {/* User CRUD */}
+          
           <Route
             path="/users"
             element={
@@ -60,7 +60,7 @@ export default function App() {
             }
           />
 
-          {/* Album CRUD */}
+          
           <Route
             path="/users/:userId/albums/new"
             element={
@@ -86,7 +86,7 @@ export default function App() {
             }
           />
 
-          {/* Photo CRUD */}
+          
           <Route
             path="/albums/:albumId/photos/new"
             element={
@@ -104,7 +104,7 @@ export default function App() {
             }
           />
 
-          {/* Fallback */}
+          
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

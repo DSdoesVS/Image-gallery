@@ -13,7 +13,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Custom hook to use the auth context
+
 function useAuth() {
   const context = useContext(AuthContext)
   if (!context) {
@@ -27,7 +27,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
-  // Initialize auth state from localStorage on component mount
+ 
   useEffect(() => {
     const storedToken = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
@@ -50,7 +50,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await loginUser({ username, password })
       
-      // Store token and user in state and localStorage
+    
       setToken(response.token)
       setUser(response.user)
       setIsAuthenticated(true)
@@ -73,7 +73,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await registerUser({ name, username, email, password })
       
-      // If the backend returns a token on registration, store it
+     
       if (response.token) {
         setToken(response.token)
         setUser(response.user)
@@ -90,7 +90,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
-    // Clear auth state and localStorage
+  
     setToken(null)
     setUser(null)
     setIsAuthenticated(false)

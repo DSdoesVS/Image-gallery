@@ -1,4 +1,4 @@
-// src/pages/UserListPage.tsx
+
 import { useState, useEffect } from 'react'
 import { fetchUsers, fetchUserAlbums } from '../services/api'
 import { deleteUser } from '../services/api'
@@ -27,11 +27,11 @@ export default function UserListPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        // 1) fetch users
+        
         const usersData = await fetchUsers()
         setUsers(usersData)
 
-        // 2) fetch albums for each user to get counts
+       
         const countEntries = await Promise.all(
           usersData.map(async (u) => {
             const albums = await fetchUserAlbums(u.id)
@@ -41,10 +41,10 @@ export default function UserListPage() {
         setAlbumCounts(Object.fromEntries(countEntries))
       } catch {
         setError('Failed to load users or album counts')
-        // Generate fake users when real data fails to load
+       
         setUsers(generateFakeUsers(8))
         
-        // Generate random album counts for each fake user
+       
         const fakeCounts: Record<string, number> = {}
         generateFakeUsers(8).forEach(user => {
           fakeCounts[user.id] = Math.floor(Math.random() * 5) + 1
@@ -60,7 +60,7 @@ export default function UserListPage() {
 
   if (loading) return <CircularProgress />
   
-  // Show a banner when using fake data, but still display the content
+ 
   const FakeDataBanner = () => (
     <Box sx={{ mb: 2 }}>
       <Alert severity="info">

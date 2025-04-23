@@ -1,4 +1,4 @@
-// src/components/albums/AlbumForm.tsx
+
 import { FC, useState, useEffect, FormEvent } from 'react'
 import { TextField, Button, Box, Typography } from '@mui/material'
 
@@ -8,11 +8,11 @@ interface AlbumFormData {
 }
 
 interface AlbumFormProps {
-  /** Page heading and submit‑button text */
+  
   title: string
-  /** Values to prefill the form (edit mode) */
+ 
   initialValues?: AlbumFormData
-  /** Called when the user submits the form */
+  
   onSubmit: (data: AlbumFormData) => Promise<void>
 }
 
@@ -21,7 +21,7 @@ const AlbumForm: FC<AlbumFormProps> = ({ title, initialValues, onSubmit }) => {
   const [userId, setUserId] = useState(initialValues?.userId || 0)
   const [submitting, setSubmitting] = useState(false)
 
-  // When initialValues changes (e.g. navigating to edit), update the fields
+  
   useEffect(() => {
     if (initialValues) {
       setTitleField(initialValues.title)

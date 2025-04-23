@@ -1,4 +1,4 @@
-// src/pages/RegisterPage.tsx
+
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { TextField, Button, Box, Typography, Alert, Paper } from '@mui/material'
@@ -29,7 +29,7 @@ export default function RegisterPage() {
     e.preventDefault()
     setError(null)
     
-    // Basic validation
+    
     if (password !== confirmPassword) {
       setError("Passwords don't match")
       return

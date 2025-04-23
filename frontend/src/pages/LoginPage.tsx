@@ -1,4 +1,4 @@
-// src/pages/LoginPage.tsx
+
 import { useState } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { TextField, Button, Box, Typography, Alert, Paper } from '@mui/material'
@@ -23,7 +23,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   
-  // Get the redirect path from location state or default to /users
+ 
   const from = location.state?.from?.pathname || '/users'
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +33,7 @@ export default function LoginPage() {
     
     try {
       await login(username, password)
-      // Redirect to the page they were trying to access, or users page
+      
       navigate(from, { replace: true })
     } catch (err: unknown) {
       const apiError = err as ApiError

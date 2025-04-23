@@ -1,4 +1,4 @@
-// src/pages/PhotoEditPage.tsx
+
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import PhotoForm from '../components/photos/PhotoForm'
@@ -37,7 +37,7 @@ export default function PhotoEditPage() {
       thumbnailUrl: data.thumbnailUrl,
       albumId: data.albumId
     })
-    // after update, go back to the album’s photo carousel
+    
     navigate(`/albums/${data.albumId}`)
   }
 

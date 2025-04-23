@@ -1,4 +1,4 @@
-// src/pages/PhotoCreatePage.tsx
+
 import { useNavigate, useParams } from 'react-router-dom'
 import PhotoForm from '../components/photos/PhotoForm'
 import { createPhoto } from '../services/api'
@@ -19,7 +19,7 @@ export default function PhotoCreatePage() {
       thumbnailUrl: data.thumbnailUrl,
       albumId: data.albumId
     })
-    // once created, go back to the album view
+    
     navigate(`/albums/${data.albumId}`)
   }
 

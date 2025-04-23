@@ -1,4 +1,4 @@
-// src/pages/AlbumEditPage.tsx
+
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import AlbumForm from '../components/albums/AlbumForm'

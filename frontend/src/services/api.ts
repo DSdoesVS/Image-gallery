@@ -1,5 +1,5 @@
-// src/services/api.ts
-import API from './axios'    // ← your JWT‑aware instance
+
+import API from './axios'    
 import { User }  from '../types/User'
 import { Album } from '../types/Album'
 import { Photo } from '../types/Photo'
@@ -10,7 +10,7 @@ export interface AuthResponse {
   user: User
 }
 
-/** AUTH */
+
 export function registerUser(data: {
   name: string
   username: string
@@ -27,7 +27,6 @@ export function loginUser(data: {
   return API.post('/auth/login', data).then(r => r.data)
 }
 
-/** USERS */
 export function fetchUsers(): Promise<User[]> {
   return API.get('/users').then(r => r.data)
 }
@@ -44,7 +43,7 @@ export function deleteUser(id: string): Promise<void> {
   return API.delete(`/users/${id}`).then(() => {})
 }
 
-/** ALBUMS */
+
 export function fetchUserAlbums(userId: string): Promise<Album[]> {
   return API.get(`/users/${userId}/albums`).then(r => r.data)
 }
@@ -61,7 +60,7 @@ export function deleteAlbum(id: string): Promise<void> {
   return API.delete(`/albums/${id}`).then(() => {})
 }
 
-/** PHOTOS */
+
 export function fetchAlbumPhotos(albumId: string): Promise<Photo[]> {
   return API.get(`/albums/${albumId}/photos`).then(r => r.data)
 }
