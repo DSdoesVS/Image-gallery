@@ -14,6 +14,7 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 4000
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173'
 
 // Check for required environment variables
 if (!process.env.JWT_SECRET) {
@@ -27,7 +28,8 @@ if (!process.env.MONGO_URI) {
 }
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI!)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => {
     console.error('MongoDB connection error:', err)
@@ -35,7 +37,13 @@ mongoose.connect(process.env.MONGO_URI)
   })
 
 // Middleware
-app.use(cors())
+app.use(
+  cors({
+    origin: FRONTEND_ORIGIN,
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+)
 app.use(express.json())
 
 // Routes
@@ -44,20 +52,28 @@ app.use(albumRoutes)
 app.use(photoRoutes)
 
 // Simple protected test route
-app.get('/protected', requireAuth, (req: AuthRequest, res) => {
-  res.json({ message: 'You accessed a protected route', user: req.user })
-})
+app.get(
+  '/protected',
+  requireAuth,
+  (req: AuthRequest, res) => {
+    res.json({ message: 'You accessed a protected route', user: req.user })
+  }
+)
 
 // Protected "list users" route
-app.get('/users', requireAuth, async (req, res) => {
-  try {
-    const users = await User.find({}, 'name username email')
-    res.json(users)
-  } catch (err) {
-    console.error('Error fetching users:', err)
-    res.status(500).json({ error: 'Failed to fetch users' })
+app.get(
+  '/users',
+  requireAuth,
+  async (req, res) => {
+    try {
+      const users = await User.find({}, 'name username email')
+      res.json(users)
+    } catch (err) {
+      console.error('Error fetching users:', err)
+      res.status(500).json({ error: 'Failed to fetch users' })
+    }
   }
-})
+)
 
 // Health check route
 app.get('/', (_, res) => {
@@ -65,10 +81,12 @@ app.get('/', (_, res) => {
 })
 
 // Global error handler
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Unhandled error:', err)
-  res.status(500).json({ error: 'Server error' })
-})
+app.use(
+  (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Unhandled error:', err)
+    res.status(500).json({ error: 'Server error' })
+  }
+)
 
 // Start server
 app.listen(PORT, () => {
